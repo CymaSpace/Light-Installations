@@ -16,8 +16,6 @@
 #define MAX_ROTATIONS_PER_SEC 2
 #define MAX_SPEED (NUM_MIC_LEDS * MAX_ROTATIONS_PER_SEC) /* LEDs per second */
 
-#define BRIGHTNESS_GRAVITY (6.0 / ANIMATE_SECS_PER_TICK)
-#define BRIGHTNESS_INITIAL_VEL_COEFF 6
 #define ROTATION_ACCEL (0.1 / ANIMATE_SECS_PER_TICK)
 #define ROTATION_FRICTION (0.10 / ANIMATE_SECS_PER_TICK)
 /* Between 0 and 1, when the particle starts to accelerate on the amplitude
@@ -26,13 +24,11 @@
 
 uint8_t dataPin = MIC_DATA_PIN;
 CRGB mic_leds_rgb[NUM_MIC_LEDS];
-double mic_leds_hue[NUM_MIC_LEDS];
-double mic_leds_val[NUM_MIC_LEDS];
-double mic_leds_vel[NUM_MIC_LEDS];
+float mic_leds_hue[NUM_MIC_LEDS];
+float mic_leds_val[NUM_MIC_LEDS];
 
-
-double current_led = (NUM_MIC_LEDS / 2);
-double speed = NUM_MIC_LEDS;
+float wave = 0;
+float amplitude = 0;
 
 void setupMic() {
   // Instantiate FastLED
@@ -41,7 +37,7 @@ void setupMic() {
   // Start with full brightness LEDs that fade to test that code works
   for (int i = 0; i < NUM_MIC_LEDS; i++) {
     mic_leds_val[i] = 255.0;
-    mic_leds_vel[i] = 0;
+    mic_leds_hue[i] = 255;
   }
 }
 
@@ -55,50 +51,41 @@ float normalize(float x) {
 }
 
 void animateMic() {
-  // Apply brightness gravity to all LEDs
+  // Dim all LEDs and set hue to current sound
   for (int i = 0; i < NUM_MIC_LEDS; i++) {
-    double vel = mic_leds_vel[i];
-    vel += (-BRIGHTNESS_GRAVITY) * ANIMATE_SECS_PER_TICK;
-    if (mic_leds_val[i] < 1 && vel < 0) { vel = 0; }
-    mic_leds_vel[i] = vel;
+    mic_leds_val[i] /= 2;
+    mic_leds_hue[i] = color.hue;
   }
 
-  // Use changes in amplitude to determine acceleration
-  double peak = normalize((float)amp_sum_L);
-  double rot_accel = peak - ACCELERATION_THRESHOLD;
-  if (rot_accel < 0) {
-    rot_accel *= ROTATION_FRICTION;
+  // Apply changes in amplitude to wave
+  float amplitude_coeff = normalize((float)amp_sum_L);
+
+  // Calculate new wave position
+  int last_wave = (int)wave;
+  float max_wave = (float)(NUM_MIC_LEDS - 1);
+  float max_wave_half = max_wave / 2.0;
+  float curr_amplitude = max_wave_half * amplitude_coeff;
+  if (curr_amplitude > amplitude) {
+    amplitude = curr_amplitude;
   } else {
-    rot_accel *= ROTATION_ACCEL;
+    amplitude *= 0.95;
   }
 
-  // Apply acceleration to rotation speed
-  speed = speed + rot_accel;
-  if (speed < 0) { speed = 0; }
-  if (speed > MAX_SPEED) { speed = MAX_SPEED; }
+  if (amplitude < 1) { amplitude = 0; }
 
-  // Rotate around the ring according to speed
-  int last = (int)current_led;
-  current_led += speed * ANIMATE_SECS_PER_TICK;
-  current_led = fmod(current_led, (NUM_MIC_LEDS - 1));
-  int curr = (int)current_led;
+  wave = max_wave_half + sin(2.0 * 3.14 * (millis() % 333) / 333.0) * amplitude;
+  int curr_wave = (int)wave;
+  while (curr_wave > NUM_MIC_LEDS - 1) { curr_wave = NUM_MIC_LEDS; }
+  while (curr_wave < 0) { curr_wave = 0; }
 
-  // Max brightness and reset velocity of LEDs between the last and current
-  while (last != curr) {
-    mic_leds_val[last] = 255;
-    mic_leds_vel[last] = (-BRIGHTNESS_INITIAL_VEL_COEFF) * speed;
-    last++;
-    last %= (NUM_MIC_LEDS - 1);
-  }
+  // Light all LEDs between last and current position
+  int diff = curr_wave - last_wave;
+  int direction = (int)(diff / abs(diff));
 
-  // Assign hue based on current audio
-  mic_leds_hue[curr] = color.hue;
-
-  // Apply brightness velocities to brightness values
-  for (int i = 0; i < NUM_MIC_LEDS; i++) {
-    mic_leds_val[i] += mic_leds_vel[i] * ANIMATE_SECS_PER_TICK;
-    if (mic_leds_val[i] < 0) { mic_leds_val[i] = 0; }
-    if (mic_leds_val[i] > 255) { mic_leds_val[i] = 255; }
+  while (last_wave != curr_wave) {
+    last_wave += (int)direction;
+    last_wave = abs(last_wave % NUM_MIC_LEDS);
+    mic_leds_val[last_wave] = 255;
   }
 
   // Apply values to the FastLED array
