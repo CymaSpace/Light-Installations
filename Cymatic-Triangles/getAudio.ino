@@ -65,12 +65,11 @@ void set_sensitivity() {
   if (max_amplitude < min_amplitude + 100) {
     max_amplitude = min_amplitude + 100;
   }
-
 }
 
 void updateSoundWave() {
   getAudiomsg();  // sets ampsum left and right value
-  set_sensitivity();  // dynamically adjust sensitivity
+  //set_sensitivity();  // dynamically adjust sensitivity
   push_audio_stack(sound_buffer, amp_sum_L);
   push_color_stack(sound_wave, sound_buffer[0]);
 }
