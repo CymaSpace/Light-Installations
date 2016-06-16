@@ -29,7 +29,7 @@ int get_freq_sum(int pin) {
   int spectrum_total = 0;
 
   //get readings from chip, sum freq values
-  for (i = 0; i < 7; i++) {
+  for (i = 0; i < 5; i++) {
     digitalWrite(STROBE_PIN, LOW);
     delayMicroseconds(30); // to allow the output to settle
 
