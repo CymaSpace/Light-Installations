@@ -20,6 +20,9 @@
 #define BRIGHTNESS_INITIAL_VEL_COEFF 6
 #define ROTATION_ACCEL (0.3 / ANIMATE_SECS_PER_TICK)
 #define ROTATION_FRICTION (0.03 / ANIMATE_SECS_PER_TICK)
+/* Between 0 and 1, when the particle starts to accelerate on the amplitude
+   scale */
+#define ACCELERATION_THRESHOLD 0.1
 
 uint8_t dataPin = MIC_DATA_PIN;
 CRGB mic_leds_rgb[NUM_MIC_LEDS];
@@ -62,7 +65,7 @@ void animateMic() {
 
   // Use changes in amplitude to determine acceleration
   double peak = normalize((float)amp_sum_L);
-  double rot_accel = peak - 0.5;
+  double rot_accel = peak - ACCELERATION_THRESHOLD;
   if (rot_accel < 0) {
     rot_accel *= ROTATION_FRICTION;
   } else {
