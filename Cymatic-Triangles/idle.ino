@@ -55,11 +55,11 @@ void setupIdleAnimation() {
     };
   }
 
-  int hue = 0;
+  int val = 0;
   for (int i = 0; i < NUM_MIC_LEDS; i++) {
-    mic_leds_hue[i] = hue;
-    hue += 255 / NUM_MIC_LEDS;
-    hue %= 255;
+    mic_leds_val[i] = val;
+    val += 255 / NUM_MIC_LEDS;
+    val %= 255;
   }
 }
 
@@ -120,8 +120,8 @@ void animateIdle() {
 
   // Apply values to the FastLED array
   for (int i = 0; i < NUM_MIC_LEDS; i++) {
-    mic_leds_hue[i] += 255 * ANIMATE_SECS_PER_TICK * IDLE_MIC_ROTATIONS_PER_SEC;
-    if (mic_leds_hue[i] > 255) { mic_leds_hue[i] = 0; }
-    mic_leds_rgb[i] = CHSV(mic_leds_hue[i], 255, 255);
+    mic_leds_val[i] += 255 * ANIMATE_SECS_PER_TICK * IDLE_MIC_ROTATIONS_PER_SEC;
+    if (mic_leds_val[i] > 255) { mic_leds_val[i] = 0; }
+    mic_leds_rgb[i] = CHSV(0, 0, mic_leds_val[i]);
   }
 }
