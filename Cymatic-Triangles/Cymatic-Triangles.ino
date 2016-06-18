@@ -73,6 +73,9 @@ void setupOuterTriangleMapping();
 
 void setupMic();
 void animateMic();
+
+void setupIdleAnimation();
+void animateIdle();
 //_______________________________________
 
 
@@ -113,6 +116,8 @@ void setup() {
   setupOuterTriangleMapping();
 
   setupMic();
+
+  setupIdleAnimation();
 }
 
 void loop() {
