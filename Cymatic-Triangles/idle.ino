@@ -1,4 +1,5 @@
 #define NUM_PARTICLES 14
+#define IDLE_MIC_ROTATIONS_PER_SEC 1
 
 struct Particle {
   int brightness;
@@ -43,6 +44,13 @@ void setupIdleAnimation() {
       position
     };
   }
+
+  int hue = 0;
+  for (int i = 0; i < NUM_MIC_LEDS; i++) {
+    mic_leds_hue[i] = hue;
+    hue += 255 / NUM_MIC_LEDS;
+    hue %= 255;
+  }
 }
 
 void setSignalLED(CRGB color) {
@@ -86,5 +94,12 @@ void animateIdle() {
     leds_outer_values[p.position].r = p.brightness;
     leds_outer_values[p.position].g = p.brightness;
     leds_outer_values[p.position].b = p.brightness;
+  }
+
+  // Apply values to the FastLED array
+  for (int i = 0; i < NUM_MIC_LEDS; i++) {
+    mic_leds_hue[i] += 255 * ANIMATE_SECS_PER_TICK * IDLE_MIC_ROTATIONS_PER_SEC;
+    if (mic_leds_hue[i] > 255) { mic_leds_hue[i] = 0; }
+    mic_leds_rgb[i] = CHSV(mic_leds_hue[i], 255, 255);
   }
 }
