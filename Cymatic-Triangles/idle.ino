@@ -1,5 +1,6 @@
 #define NUM_PARTICLES 14
 #define IDLE_MIC_ROTATIONS_PER_SEC 1
+#define IDLE_AMPLITUDE ((MIN_AMPLITUDE + MAX_AMPLITUDE) / 3)
 
 struct Particle {
   int brightness;
@@ -9,6 +10,15 @@ struct Particle {
 
 Particle particles[NUM_PARTICLES];
 bool positions[NUM_LEDS];
+
+bool shouldIdle() {
+  for (int i = 0; i < SOUND_BUFFER_LENGTH; i++) {
+    if (sound_buffer[i] > IDLE_AMPLITUDE) {
+      return false;
+    }
+  }
+  return true;
+}
 
 int randomFreePosition(int position) {
   positions[position] = false;
@@ -85,6 +95,18 @@ void updateParticles() {
 void animateIdle() {
   updateParticles();
 
+  // Blank all LEDs
+  for (int i = 0; i < NUM_LEDS; i++) {
+    leds_inner_values[i].r = 0;
+    leds_inner_values[i].g = 0;
+    leds_inner_values[i].b = 0;
+
+    leds_outer_values[i].r = 0;
+    leds_outer_values[i].g = 0;
+    leds_outer_values[i].b = 0;
+  }
+
+  // Apply particles to LEDs
   for (int i = 0; i < NUM_PARTICLES; i++) {
     Particle p = particles[i];
     leds_inner_values[p.position].r = p.brightness;

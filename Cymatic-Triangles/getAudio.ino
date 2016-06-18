@@ -29,7 +29,7 @@ int get_freq_sum(int pin) {
   int spectrum_total = 0;
 
   //get readings from chip, sum freq values
-  for (i = 0; i < 5; i++) {
+  for (i = 0; i < 3; i++) {
     digitalWrite(STROBE_PIN, LOW);
     delayMicroseconds(30); // to allow the output to settle
 
@@ -105,16 +105,20 @@ CRGB get_LED_color(int value) {
 
 void push_audio_stack(int stack[], int value) {
   int sum = 0;
-  for (int i = (SOUND_BUFFER_LENGTH - 1); i >= 0; --i) {
+  for (int i = 0; i < SOUND_SMOOTHING_LENGTH; i++) {
     sum += stack[i];
-    stack[i] = stack[i - 1];
   }
   sum += value;
-  stack[0] = sum / (SOUND_BUFFER_LENGTH + 1);
+  value = sum / (SOUND_SMOOTHING_LENGTH + 1);
+
+  for (int i = (SOUND_BUFFER_LENGTH - 1); i >= 1; i--) {
+    stack[i] = stack[i - 1];
+  }
+  stack[0] = value;
 }
 
 void push_color_stack(CRGB stack[], int value) {
-  for (int i = (SOUND_WAVE_LENGTH - 1); i >= 0; --i) {
+  for (int i = (SOUND_WAVE_LENGTH - 1); i >= 1; --i) {
     stack[i] = stack[i - 1];
   }
   CRGB color = get_LED_color(value);

@@ -19,7 +19,8 @@
 #define AUDIO_MILLIS_PER_TICK (1000 / AUDIO_TICKS)
 #define AUDIO_TIME_SECONDS 1 // How much time it takes audio to travel to the outer edge of the display
 #define SOUND_WAVE_LENGTH (AUDIO_TIME_SECONDS * AUDIO_TICKS)
-#define SOUND_BUFFER_LENGTH 3 // How many audio snapshots to use for smoothing
+#define SOUND_SMOOTHING_LENGTH 3 // How many audio snapshots to use for smoothing
+#define SOUND_BUFFER_LENGTH (AUDIO_TICKS * 10) // How many audio snapshots to use for smoothing
 
 #define SENSITIVITY_DIVISOR 100. // Higher = range of sensitivity values on pot is lower
 #define LEFT_START_POINT ((NUM_LEDS / 2)) // Starting LED for left side
@@ -27,17 +28,17 @@
 #define RIGHT_START_POINT ((NUM_LEDS / 2) + 1) // Starting LED for the right side
 #define RIGHT_END_POINT (NUM_LEDS - 1) // Generally the end of the right side is the last LED
 #define LED_STACK_SIZE (NUM_LEDS) // How many LED's in each stack
-#define MAX_AMPLITUDE 4700 // Maximum possible amplitude value
+#define MAX_AMPLITUDE 2000 // Maximum possible amplitude value
 #define MAX_AMPLITUDE_MULTIPLIER 380
-#define MIN_AMPLITUDE 545 // Lowest possible amplitude value (Higher number causes there to be more blank LED's)
+#define MIN_AMPLITUDE 500 // Lowest possible amplitude value (Higher number causes there to be more blank LED's)
 #define MIN_AMPLITUDE_MULTIPLIER 200
 #define SENSITIVITY_MULTIPLIER 200 // Higher = range of sensitivity values on pot is lower
 
 int monomode; // Used to duplicate the left single for manual input
 int next_audio_tick = 0; // Refresh rate of the animation
 int next_animate_tick = 0; // Refresh rate of the animation
-float min_amplitude = 500;
-float max_amplitude = 2000;
+float min_amplitude = MIN_AMPLITUDE;
+float max_amplitude = MAX_AMPLITUDE;
 int start_hue = 0;
 int amp_sum_L = 0;
 int amp_sum_R = 0;
@@ -76,6 +77,7 @@ void animateMic();
 
 void setupIdleAnimation();
 void animateIdle();
+bool shouldIdle();
 //_______________________________________
 
 
@@ -130,9 +132,15 @@ void loop() {
 
   if (current_time > next_animate_tick) {
     next_animate_tick = current_time + ANIMATE_MILLIS_PER_TICK;
-    animateTriangles(leds_inner_values, leds_inner_mapping);
-    animateTriangles(leds_outer_values, leds_outer_mapping);
-    animateMic();
+
+    if (!shouldIdle()) {
+      animateTriangles(leds_inner_values, leds_inner_mapping);
+      animateTriangles(leds_outer_values, leds_outer_mapping);
+      animateMic();
+    } else {
+      animateIdle();
+    }
+
     FastLED.show();
   }
 
