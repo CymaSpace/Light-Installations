@@ -56,6 +56,8 @@ CHSV color(0, 255, 255);
 float leds_inner_mapping[NUM_LEDS]; // Represents LED strip
 float leds_outer_mapping[NUM_LEDS]; // Represents LED strip
 
+bool first_idle = true;
+
 //____________Function declarations______
 int get_freq_sum(int pin);
 CRGB get_LED_color(int value);
@@ -134,10 +136,16 @@ void loop() {
     next_animate_tick = current_time + ANIMATE_MILLIS_PER_TICK;
 
     if (!shouldIdle()) {
+      if (!first_idle) { first_idle = true; }
+
       animateTriangles(leds_inner_values, leds_inner_mapping);
       animateTriangles(leds_outer_values, leds_outer_mapping);
       animateMic();
     } else {
+      if (first_idle) {
+        first_idle = false;
+        setupIdleAnimation();
+      }
       animateIdle();
     }
 
