@@ -99,7 +99,7 @@ CRGB get_LED_color(int value) {
     color.val = 255;
   }
   color.saturation = 255;
-  color.hue = start_hue + ((ratio * 255) * 2);
+  color.hue = start_hue + (ratio * (255 - start_hue));
   return color;
 }
 

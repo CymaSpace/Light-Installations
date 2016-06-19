@@ -39,7 +39,7 @@ int next_audio_tick = 0; // Refresh rate of the animation
 int next_animate_tick = 0; // Refresh rate of the animation
 float min_amplitude = MIN_AMPLITUDE;
 float max_amplitude = MAX_AMPLITUDE;
-int start_hue = 0;
+int start_hue = 96;
 int amp_sum_L = 0;
 int amp_sum_R = 0;
 
