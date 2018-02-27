@@ -26,7 +26,7 @@
 /* Mapping for Test with #SeeingSound Piano 
 #define PIN 6 
 #define COLUMNS 40
-#define ROWS 12
+#define ROWS 15
 */
 
 #define mBrightness 128 //matrix brightness
