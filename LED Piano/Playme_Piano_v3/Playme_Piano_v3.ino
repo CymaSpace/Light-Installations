@@ -4,23 +4,30 @@
 #include <SD.h>
 
 #include <Adafruit_GFX.h>
-#include <Fonts/Picopixel.h> // Load a tiny pixel font into memory from GFX Library
+#include <Fonts/Org_01.h> // Load a tiny pixel font into memory from GFX Library
 #include <Adafruit_NeoMatrix.h>
 #include <Adafruit_NeoPixel.h>
 #ifndef PSTR
 #define PSTR // Make Arduino Due happy
 #endif
 
-/* Mapping for Macron Productions LED Piano
+/* Mapping for Macron Productions LED Piano */
 #define PIN 21 
 #define COLUMNS 38
 #define ROWS 12
-*/
 
-/* Mapping for Test with LED Curtain / Rack */
+
+/* Mapping for Test with LED Curtain / Rack 
 #define PIN 6 
 #define COLUMNS 25
 #define ROWS 6
+*/
+
+/* Mapping for Test with #SeeingSound Piano 
+#define PIN 6 
+#define COLUMNS 40
+#define ROWS 12
+*/
 
 #define mBrightness 128 //matrix brightness
 
@@ -30,8 +37,8 @@ Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(COLUMNS, ROWS, PIN,
   NEO_MATRIX_ROWS + NEO_MATRIX_ZIGZAG,
   NEO_GRB            + NEO_KHZ800);
 
-//const int myInput = AUDIO_INPUT_LINEIN;
-const int myInput = AUDIO_INPUT_MIC;
+const int myInput = AUDIO_INPUT_LINEIN;
+//const int myInput = AUDIO_INPUT_MIC;
 
 // Create the Audio components.  These should be created in the
 // order data flows, inputs/sources -> processing -> outputs
@@ -69,10 +76,10 @@ void setup()
   Serial.begin(9600);
 
   matrix.begin();
-  matrix.setFont(&Picopixel); // Call font previously loaded into memory during setup.
+  matrix.setFont(&Org_01); // Call font previously loaded into memory during setup.
   matrix.show(); // Initialize all pixels to 'off'
   //matrix.setBrightness(lightsensor);
-  matrix.setBrightness(100); // Fixed brightness if no light sensor available.
+  matrix.setBrightness(128); // Fixed brightness if no light sensor available.
   matrix.setTextColor(drawRGB24toRGB565(0, 0, 0));
   // Audio connections require memory to work.  For more
   // detailed information, see the MemoryAndCpuUsage example
@@ -126,15 +133,15 @@ void loop()
 
     if ((millis() - timer) > timeout && sum < amp_threshold){
       
-      matrix.setBrightness(lightsensor);
+      //matrix.setBrightness(lightsensor);
       //turn_off_pixels(); enable this to turn off text
-      matrix.setCursor(0, 4); // comment out & turn off text - setCursor(2,4) places text 2 columns from left and 4 rows from bottom
+      matrix.setCursor(1, 8); // comment out & turn off text - setCursor(2,4) places text 2 columns from left and 4 rows from bottom
       matrix.setTextColor(drawRGB24toRGB565((fade * 255), (fade * 255), (fade * 255))); // comment out & turn off text
       matrix.setTextSize(1); // comment out & turn off text
       matrix.setTextWrap(false); // comment out & turn off text
-      matrix.print("Play"); // comment out & turn off text
-      matrix.setCursor(16, 4); // comment out & turn off text
-      matrix.print("Me"); // comment out & turn off text
+      matrix.print("PLAY"); // comment out & turn off text
+      matrix.setCursor(26, 8); // comment out & turn off text
+      matrix.print("ME"); // comment out & turn off text
       matrix.show();
       touched = false;
       
